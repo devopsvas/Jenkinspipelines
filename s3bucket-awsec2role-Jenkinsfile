@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "us-east-1"   // change to your AWS region
+        BUCKET_NAME = "vas-test-jenkins-bucket-12345"  // change bucket name
+    }
+
+    stages {
+        stage('Check if Bucket Exists') {
+            steps {
+                script {
+                    def check = sh(
+                        script: "aws s3api head-bucket --bucket ${BUCKET_NAME} --region ${AWS_REGION} 2>&1 || true",
+                        returnStdout: true
+                    ).trim()
+
+                    if (check.contains("403") || check.contains("404") || check.contains("Not Found")) {
+                        echo "Bucket does not exist. Proceeding..."
+                    } else if (check.contains("301") || check.contains("200") || check.contains("Found")) {
+                        error "S3 bucket ${BUCKET_NAME} already exists. Failing pipeline."
+                    } else {
+                        error "Unexpected AWS CLI response: ${check}"
+                    }
+                }
+            }
+        }
+
+        stage('Create Bucket') {
+            steps {
+                sh """
+                  aws s3api create-bucket \
+                    --bucket ${BUCKET_NAME} \
+                    --region ${AWS_REGION} \
+                    --create-bucket-configuration LocationConstraint=${AWS_REGION}
+                """
+                echo "Bucket ${BUCKET_NAME} created successfully!"
+            }
+        }
+    }
+}
