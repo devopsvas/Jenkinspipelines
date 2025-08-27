@@ -12,7 +12,6 @@ pipeline {
                           aws s3api create-bucket \
                             --bucket vas-unique-bucket-123456 \
                             --region us-east-1 \
-                            --create-bucket-configuration LocationConstraint=us-east-1
                         '''
                     }
                 }
