@@ -10,7 +10,7 @@ pipeline {
                         // Replace 'vas-unique-bucket-123456' with your bucket name
                         sh '''
                           aws s3api create-bucket \
-                            --bucket my-unique-bucket-123456 \
+                            --bucket vas-unique-bucket-123456 \
                             --region us-east-1 \
                             --create-bucket-configuration LocationConstraint=us-east-1
                         '''
